@@ -32,7 +32,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.Flags().StringP("directory", "d", ".", "target directory to scaffold the template into")
-	rootCmd.Flags().BoolP("force", "f", false, "force scaffolding even if target directory is not empty")
+	rootCmd.Flags().BoolP("force", "f", false, "force scaffolding, this deletes the target directory if it is not empty")
 }
 
 func Execute() {

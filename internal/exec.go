@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 )
 
 type Config struct {
@@ -29,6 +30,14 @@ type Config struct {
 
 func Exec(cfg Config) error {
 	err := createDirectory(cfg.TargetDirectory, cfg.Force)
+	if err != nil {
+		return err
+	}
+	err = cloneTemplate(cfg.TargetDirectory, cfg.TemplateUri)
+	if err != nil {
+		return err
+	}
+	err = os.RemoveAll(cfg.TargetDirectory + "/.git")
 	if err != nil {
 		return err
 	}
@@ -69,4 +78,14 @@ func isDirectoryEmpty(dir string) (bool, error) {
 		return true, nil
 	}
 	return len(names) == 0, nil
+}
+
+func cloneTemplate(dir string, uri string) error {
+	cmd := exec.Command("git", "clone", "--depth", "1", uri, dir)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	return nil
 }
