@@ -28,36 +28,45 @@ type Config struct {
 }
 
 func Exec(cfg Config) error {
-	err := createTargetDirectory(cfg.TargetDirectory, cfg.Force)
+	err := createDirectory(cfg.TargetDirectory, cfg.Force)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func createTargetDirectory(dir string, force bool) error {
-	err := os.MkdirAll(dir, 0744)
+func createDirectory(dir string, force bool) error {
+	empty, err := isDirectoryEmpty(dir)
 	if err != nil {
 		return err
 	}
-	if force {
-		return nil
+	if !empty {
+		if !force {
+			return fmt.Errorf("directory %s is not empty, scaffolding must be enforced", dir)
+		}
+		err := os.RemoveAll(dir)
+		if err != nil {
+			return err
+		}
 	}
-	return validateTargetDirectoryNonEmpty(dir)
+	return os.MkdirAll(dir, 0744)
 }
 
-func validateTargetDirectoryNonEmpty(dir string) error {
+func isDirectoryEmpty(dir string) (bool, error) {
 	f, err := os.Open(dir)
 	if err != nil {
-		return err
+		if os.IsNotExist(err) {
+			return true, nil
+		}
+		return false, err
 	}
 	defer f.Close()
-	_, err = f.Readdirnames(1)
-	if err == io.EOF {
-		return nil
-	}
+	names, err := f.Readdirnames(1)
 	if err != nil {
-		return err
+		if err != io.EOF {
+			return false, err
+		}
+		return true, nil
 	}
-	return fmt.Errorf("directory %s is not empty, scaffolding must be enforced", dir)
+	return len(names) == 0, nil
 }
