@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 type Config struct {
@@ -37,7 +38,7 @@ func Exec(cfg Config) error {
 	if err != nil {
 		return err
 	}
-	err = os.RemoveAll(cfg.TargetDirectory + "/.git")
+	err = os.RemoveAll(filepath.Join(cfg.TargetDirectory, ".git"))
 	if err != nil {
 		return err
 	}

@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/thomaszub/gotem/internal"
@@ -61,7 +62,7 @@ func parseConfig(cmd *cobra.Command, args []string) (internal.Config, error) {
 	}
 	return internal.Config{
 		TemplateUri:     args[0],
-		TargetDirectory: dir,
+		TargetDirectory: filepath.Clean(dir),
 		Force:           force,
 	}, nil
 }
